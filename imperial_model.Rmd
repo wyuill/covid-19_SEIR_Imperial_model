@@ -1,0 +1,86 @@
+---
+title: "COVID-19 Modelling - Imperial"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse, plotly, zoo)
+
+source("functions.R")
+
+age_specific_parameters <- read_csv("age_specific_parameters.csv")
+
+populations <- read_csv("populations.csv", col_types = cols(X1 = col_skip()))
+
+
+#####
+##  CHOICES
+#####
+
+Area = "RGT - Cambridge University Hospitals NHS Foundation Trust"
+Type = "Trust Catchment - All Admissions"
+```
+
+## Imperial model info and assumptions
+Add text here
+
+```{r model, results=FALSE}
+models <- list()
+
+for(i in 1:nrow(age_specific_parameters)) {
+  Age = age_specific_parameters$age_group[i]
+  mortality_rate = age_specific_parameters$mortality_rate[i]
+  symptomatic_pct = age_specific_parameters$symptomatic_pct[i]
+  symptomatic_requring_hospital_pct = age_specific_parameters$symptomatic_requring_hospital_pct[i]
+  hospitalised_requiring_critical_care = age_specific_parameters$hospitalised_requiring_critical_care[i]
+  hospitalised_requiring_critical_care_l3 = age_specific_parameters$hospitalised_requiring_critical_care_l3[i]
+  ifr = age_specific_parameters$ifr[i]
+
+  pop = filter(populations, Area==area & Type==type & Age==age) %>% select(population) %>% sum()
+
+  models[[Age]] <- imperial_model(initial_susceptible = pop,
+                                  mortality_rate = mortality_rate,
+                                  symptomatic_pct = symptomatic_pct,
+                                  hospitalised_pct = symptomatic_requring_hospital_pct,
+                                  critical_care_pct = hospitalised_requiring_critical_care,
+                                  critical_care_l3_pct = hospitalised_requiring_critical_care_l3,
+                                  incidence_fatatilty_rate = ifr,
+                                  los_hopsital = 7,
+                                  los_critical_care = 14,
+                                  los_critical_care_l3 = 14,
+                                  mod_critical_care = 0.33,
+                                  mod_deaths = 0.5)
+}
+
+all_models <- bind_rows(models, .id = "age_group")
+
+m1 <- models$`80+`
+```
+
+```{r table}
+summary_by_age <- all_models %>%
+  group_by(age_group) %>%
+  summarise(total_population = max(total_pop),
+            peak_day = days[which.max(infected)],
+            total_cases = max(recovered),
+            peak_cases = max(infected),
+            peak_symptomatic = max(symptomatic),
+            total_hospitalised = sum(hospitalised_admissions),
+            peak_hospitalised_admissioms = max(hospitalised_admissions),
+            peak_hosptial_occupied = max(hospitalised_occupied),
+            total_critical_care = sum(critical_care_admissions),
+            peak_critical_care_admissions = max(critical_care_admissions),
+            peak_critical_care_occupied = max(critical_care_occupied),
+            total_critical_care_l3 = sum(critical_care_l3_admissions),
+            peak_critical_care_l3_admissons = max(critical_care_l3_admissions),
+            peak_critical_care_l3_occupied = max(critical_care_l3_occupied),
+            total_deaths = sum(deaths),
+            peak_deaths = max(deaths))
+```
+
+```{r graph}
+
+
+```
