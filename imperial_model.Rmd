@@ -12,7 +12,7 @@ source("functions.R")
 
 age_specific_parameters <- read_csv("age_specific_parameters.csv")
 
-populations <- read_csv("populations.csv", col_types = cols(X1 = col_skip()))
+populations <- read_csv("populations/populations.csv", col_types = cols(X1 = col_skip()))
 
 #####
 ##  CHOICES
