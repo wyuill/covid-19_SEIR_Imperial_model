@@ -6,7 +6,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(tidyverse, plotly, zoo)
+library(tidyverse)
+library(zoo)
 
 source("functions.R")
 
@@ -77,6 +78,8 @@ summary_by_age <- all_models %>%
             peak_critical_care_l3_occupied = max(critical_care_l3_occupied),
             total_deaths = sum(deaths),
             peak_deaths = max(deaths))
+
+summary_by_age
 ```
 
 ```{r graph}
