@@ -5,3 +5,5 @@ Populations for local authorities, NHS Trusts, CCGs, NHS Regions and STPs are pr
 Please note that this work is at an early stage and that errors may be present. Frequent changes should be expected.
 
 This code incorporates work by Imperial College London and Sheffield Council but is in not affiliated with them. All mistakes should be attributed to the author.
+
+Critical care treatment estimates are drawn from [here](https://www.thelancet.com/action/showPdf?pii=S2213-2600%2820%2930079-5)
