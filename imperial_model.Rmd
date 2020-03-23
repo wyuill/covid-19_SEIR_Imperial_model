@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(zoo)
+library(readxl)
 
 source("functions.R")
 
@@ -19,8 +20,8 @@ populations <- read_csv("populations/populations.csv", col_types = cols(X1 = col
 ##  CHOICES
 #####
 
-Area = "RGT - Cambridge University Hospitals NHS Foundation Trust"
-Type = "Trust Catchment - All Admissions"
+Area = "England"
+Type = "Resident"
 ```
 
 ## Imperial model info and assumptions
@@ -31,6 +32,7 @@ models <- list()
 
 for(i in 1:nrow(age_specific_parameters)) {
   Age = age_specific_parameters$age_group[i]
+  attack_rate = age_specific_parameters$attack_rate_r2_0[i]
   mortality_rate = age_specific_parameters$mortality_rate[i]
   symptomatic_pct = age_specific_parameters$symptomatic_pct[i]
   symptomatic_requring_hospital_pct = age_specific_parameters$symptomatic_requring_hospital_pct[i]
@@ -49,6 +51,8 @@ for(i in 1:nrow(age_specific_parameters)) {
   ifr = age_specific_parameters$ifr[i]
 
   pop = filter(populations, Area==area & Type==type & Age==age) %>% select(population) %>% sum()
+  
+  pop = pop * attack_rate
 
   models[[Age]] <- imperial_model(initial_susceptible = pop,
                                   mortality_rate = mortality_rate,
@@ -93,9 +97,6 @@ summary_by_age <- all_models %>%
             total_critical_care = sum(critical_care_admissions),
             peak_critical_care_admissions = max(critical_care_admissions),
             peak_critical_care_occupied = max(critical_care_occupied),
-            total_critical_care_l3 = sum(critical_care_l3_admissions),
-            peak_critical_care_l3_admissons = max(critical_care_l3_admissions),
-            peak_critical_care_l3_occupied = max(critical_care_l3_occupied),
             total_deaths = sum(deaths),
             peak_deaths = max(deaths))
 
